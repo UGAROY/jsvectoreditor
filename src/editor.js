@@ -31,7 +31,7 @@ var getRelativePositionToWindow = function(elem) {
         _this.onDblClick(event.clientX - position[0], event.clientY - position[1], event.target);
     };
 
-function VectorEditor(elem, width, height) {
+window.VectorEditor = function(elem, width, height) {
     if (typeof(Raphael) != 'function') { //check for the renderer
         return alert('Error! Renderer is Missing!'); //if renderer isn't there, return false;
     }
@@ -103,16 +103,6 @@ VectorEditor.prototype.setMode = function(mode) {
     }
 };
 
-VectorEditor.prototype.on = function(event, callback) {
-    if (!this.listeners[event]) {
-        this.listeners[event] = [];
-    }
-
-    if (this.in_array(callback, this.listeners[event]) == -1) {
-        this.listeners[event].push(callback);
-    }
-};
-
 
 VectorEditor.prototype.returnRotatedPoint = function(x, y, cx, cy, a) {
     // http://mathforum.org/library/drmath/view/63184.html
@@ -126,24 +116,6 @@ VectorEditor.prototype.returnRotatedPoint = function(x, y, cx, cy, a) {
     var ny = r * Math.sin((a + iA) / (180 / Math.PI));
 
     return [cx + nx, cy + ny];
-};
-
-VectorEditor.prototype.fire = function(event) {
-    if (this.listeners[event]) {
-        for (var i = 0; i < this.listeners[event].length; i++) {
-            if (this.listeners[event][i].apply(this, arguments) === false) {
-                return false;
-            }
-        }
-    }
-};
-
-VectorEditor.prototype.un = function(event, callback) {
-    if (!this.listeners[event]) return;
-    var index = 0;
-    while ((index = this.in_array(callback, this.listeners[event])) != -1) {
-        this.listeners[event].splice(index, 1);
-    }
 };
 
 //from the vXJS JS Library
@@ -420,7 +392,6 @@ VectorEditor.prototype.getMarkup = function() {
     return this.draw.canvas.parentNode.innerHTML;
 };
 
-
 VectorEditor.prototype.onDblClick = function(x, y, target) {
     this.fire('dblclick');
     if (this.selected.length == 1) {
@@ -443,8 +414,6 @@ VectorEditor.prototype.onMouseUp = function(x, y, target) {
     if (this.selected[0]) {
         this.applyTransforms(this.selected[0]);
     }
-
-
 
     if (this.mode == 'select' || this.mode == 'delete') {
         if (this.selectbox) {
@@ -512,3 +481,31 @@ VectorEditor.prototype.onMouseUp = function(x, y, target) {
     }
     return false;
 }
+
+VectorEditor.prototype.on = function(event, callback) {
+    if (!this.listeners[event]) {
+        this.listeners[event] = [];
+    }
+
+    if (this.in_array(callback, this.listeners[event]) == -1) {
+        this.listeners[event].push(callback);
+    }
+};
+
+VectorEditor.prototype.fire = function(event) {
+    if (this.listeners[event]) {
+        for (var i = 0; i < this.listeners[event].length; i++) {
+            if (this.listeners[event][i].apply(this, arguments) === false) {
+                return false;
+            }
+        }
+    }
+};
+
+VectorEditor.prototype.un = function(event, callback) {
+    if (!this.listeners[event]) return;
+    var index = 0;
+    while ((index = this.in_array(callback, this.listeners[event])) != -1) {
+        this.listeners[event].splice(index, 1);
+    }
+};

@@ -31,14 +31,12 @@ VectorEditor.prototype.deleteShape = function(shape, nofire) {
 };
 
 VectorEditor.prototype.deleteAll = function() {
-  this.fire('clear2');
   this.draw.clear();
   this.shapes = [];
   this.trackers = [];
 };
 
 VectorEditor.prototype.clearShapes = function() {
-  this.fire('clear');
   while (this.shapes.length > 0) {
     this.deleteShape(this.shapes[0], true); //nofire
   }

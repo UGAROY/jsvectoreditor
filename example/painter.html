@@ -134,13 +134,12 @@
       <option value=".10">10%</option>  
     </select> 
   </div>
-  <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
-  <script type="text/javascript" src="raphael.js"></script>
-  <script type="text/javascript" src="editor.js"></script>
-  <script type="text/javascript" src="shape.js"></script>
-  <script type="text/javascript" src="tracker.js"></script>
-  <script type="text/javascript">
   
+  <script src="http://code.jquery.com/jquery-1.11.3.min.js"></script>
+  <script src="../lib/raphael.js"></script>
+  <script src="../dist/jsvectoreditor.js"></script>
+    
+  <script type="text/javascript">
   function setMode(mode){
       if(mode == "text"){
       editor.prop.text = prompt("Text:",editor.prop.text)
