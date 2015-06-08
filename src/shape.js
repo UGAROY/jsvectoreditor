@@ -71,7 +71,7 @@ VectorEditor.prototype.drawGrid = function () {
     this.paper.drawGrid(0, 0, 480, 272, 10, 10, 'blue').toBack();
 };
 VectorEditor.prototype.move = function (shape, dx, dy) {
-    if (shape.type === 'rect' || shape.type === 'image' || shape.type === 'ellipse') {
+    if (shape.type === 'rect' || shape.type === 'image' || shape.type === 'ellipse' || shape.type == 'text') {
         shape.transform(Raphael.format('...t{0},{1}', dx, dy));
     } else if (shape.type === 'path') {
         shape.transform(Raphael.format('...t{0},{1}', dx, dy));
@@ -154,7 +154,10 @@ VectorEditor.prototype.resize = function (shape, raw_x, raw_y, box) {
         shape.attr('rx', width/2);
         shape.attr('ry', height/2);
     } else if (shape.type === 'text') {
-        shape.attr('font-size', Math.abs(width));
+        shape.attr('font-size', Math.abs(height));
+        var updatedBox = shape.getBBox();
+        shape.attr('x', updatedBox.width/2);
+        shape.attr('y', updatedBox.height/2);
     } else if (shape.type === 'path') {
         var transforms = this.except('s', shape.transform());
         transforms.unshift([

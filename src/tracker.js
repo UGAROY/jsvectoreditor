@@ -65,7 +65,6 @@ VectorEditor.prototype.updateTracker = function (tracker) {
         var shape = tracker.shape;
         shape._.dirty = true;
         var box = shape.getBBox(true);
-        console.log('box', box);
         //this is somewhat hackish here. Once a path has stopped the transformation.
         //all the transformations are automatically converted to coordinates.
         if (shape.type === 'path') {

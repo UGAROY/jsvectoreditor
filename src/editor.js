@@ -173,6 +173,7 @@ VectorEditor.prototype.onMouseDown = function (x, y, target) {
         } else if (this.mode === 'text') {
             shape = this.paper.text(0, 0, this.prop['text']).attr('font-size', 0);
             shape.text = this.prop['text'];
+            shape.translate(x, y);
         }
         if (shape) {
             shape.id = this.generateUUID();
