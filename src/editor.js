@@ -154,9 +154,11 @@ VectorEditor.prototype.onMouseDown = function (x, y, target) {
     } else{
         var shape;
         if (this.mode === 'rect') {
-            shape = this.paper.rect(x, y, 0, 0);
+            shape = this.paper.rect(0, 0, 0, 0);
+            shape.translate(x, y);
         } else if (this.mode === 'ellipse') {
-            shape = this.paper.ellipse(x, y, 0, 0);
+            shape = this.paper.ellipse(0, 0, 0, 0);
+            shape.translate(x, y);
         } else if (this.mode === 'path') {
             shape = this.paper.path('M{0},{1}', x, y);
         } else if (this.mode === 'line') {
@@ -167,9 +169,9 @@ VectorEditor.prototype.onMouseDown = function (x, y, target) {
             shape.polypoints = [[x,y]];
             shape.subtype = 'polygon';
         } else if (this.mode === 'image') {
-            shape = this.paper.image(this.prop.src, x, y, 0, 0);
+            shape = this.paper.image(this.prop.src, 0, 0, 0, 0);
         } else if (this.mode === 'text') {
-            shape = this.paper.text(x, y, this.prop['text']).attr('font-size', 0);
+            shape = this.paper.text(0, 0, this.prop['text']).attr('font-size', 0);
             shape.text = this.prop['text'];
         }
         if (shape) {
@@ -217,8 +219,8 @@ VectorEditor.prototype.onMouseMove = function (x, y, target) {
                 var box = this.selected[0].getBBox();
                 if (this.selected[0].type === 'ellipse') {
                     this.onGrabXY = [
-                        box.cx,
-                        box.cy
+                        box.x,
+                        box.y
                     ];
                 } else if (this.selected[0].type === 'path') {
                     this.onGrabXY = [
@@ -262,22 +264,20 @@ VectorEditor.prototype.onMouseMove = function (x, y, target) {
                 //var hack = pathsplit.reverse().slice(3).reverse().join(" ")+' ';
                 if (this.mode === 'line') {
                     //safety measure, the next should work, but in practice, no
+                    console.log(pathsplit);
                     pathsplit.splice(1);
                 } else {
                     var last = pathsplit[pathsplit.length - 1];
                     if (this.selected[0].polypoints.length < pathsplit.length) {
-                        //if(Math.floor(last[1]) == this.lastpointsX && Math.floor(last[2]) == this.lastpointsY){
                         pathsplit.splice(pathsplit.length - 1, 1);
                     } 
                 }
-                //this.lastpointsX = x; //TO FIX A NASTY UGLY BUG
-                //this.lastpointsY = y; //SERIOUSLY
                 this.selected[0].attr('path', pathsplit.toString() + 'L' + x + ' ' + y);
             } else {
                 //console.debug(pathsplit)
                 //normally when this executes there's somethign strange that happened
                 this.selected[0].attr('path', this.selected[0].attrs.path + 'L' + x + ' ' + y);
-            }    //this.selected[0].lineTo(x, y)
+            }
         }
     }
     return false;

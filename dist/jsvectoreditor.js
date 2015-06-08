@@ -162,9 +162,11 @@ VectorEditor.prototype.onMouseDown = function (x, y, target) {
     } else{
         var shape;
         if (this.mode === 'rect') {
-            shape = this.paper.rect(x, y, 0, 0);
+            shape = this.paper.rect(0, 0, 0, 0);
+            shape.translate(x, y);
         } else if (this.mode === 'ellipse') {
-            shape = this.paper.ellipse(x, y, 0, 0);
+            shape = this.paper.ellipse(0, 0, 0, 0);
+            shape.translate(x, y);
         } else if (this.mode === 'path') {
             shape = this.paper.path('M{0},{1}', x, y);
         } else if (this.mode === 'line') {
@@ -175,9 +177,9 @@ VectorEditor.prototype.onMouseDown = function (x, y, target) {
             shape.polypoints = [[x,y]];
             shape.subtype = 'polygon';
         } else if (this.mode === 'image') {
-            shape = this.paper.image(this.prop.src, x, y, 0, 0);
+            shape = this.paper.image(this.prop.src, 0, 0, 0, 0);
         } else if (this.mode === 'text') {
-            shape = this.paper.text(x, y, this.prop['text']).attr('font-size', 0);
+            shape = this.paper.text(0, 0, this.prop['text']).attr('font-size', 0);
             shape.text = this.prop['text'];
         }
         if (shape) {
@@ -225,8 +227,8 @@ VectorEditor.prototype.onMouseMove = function (x, y, target) {
                 var box = this.selected[0].getBBox();
                 if (this.selected[0].type === 'ellipse') {
                     this.onGrabXY = [
-                        box.cx,
-                        box.cy
+                        box.x,
+                        box.y
                     ];
                 } else if (this.selected[0].type === 'path') {
                     this.onGrabXY = [
@@ -270,22 +272,20 @@ VectorEditor.prototype.onMouseMove = function (x, y, target) {
                 //var hack = pathsplit.reverse().slice(3).reverse().join(" ")+' ';
                 if (this.mode === 'line') {
                     //safety measure, the next should work, but in practice, no
+                    console.log(pathsplit);
                     pathsplit.splice(1);
                 } else {
                     var last = pathsplit[pathsplit.length - 1];
                     if (this.selected[0].polypoints.length < pathsplit.length) {
-                        //if(Math.floor(last[1]) == this.lastpointsX && Math.floor(last[2]) == this.lastpointsY){
                         pathsplit.splice(pathsplit.length - 1, 1);
                     } 
                 }
-                //this.lastpointsX = x; //TO FIX A NASTY UGLY BUG
-                //this.lastpointsY = y; //SERIOUSLY
                 this.selected[0].attr('path', pathsplit.toString() + 'L' + x + ' ' + y);
             } else {
                 //console.debug(pathsplit)
                 //normally when this executes there's somethign strange that happened
                 this.selected[0].attr('path', this.selected[0].attrs.path + 'L' + x + ' ' + y);
-            }    //this.selected[0].lineTo(x, y)
+            }
         }
     }
     return false;
@@ -480,7 +480,9 @@ VectorEditor.prototype.move = function (shape, dx, dy) {
     if (shape.type === 'rect' || shape.type === 'image' || shape.type === 'ellipse') {
         shape.transform(Raphael.format('...t{0},{1}', dx, dy));
     } else if (shape.type === 'path') {
-        shape.attr('path', Raphael.transformPath(shape.attr('path'), ['t', dx, dy]));
+        shape.transform(Raphael.format('...t{0},{1}', dx, dy));
+        //shape.attr('path', Raphael.transformPath(shape.attr('path'), ['t', dx, dy]));
+        console.log('move', shape.attr('path'));
     }
     this.renormalizeRotation(shape);
 };
@@ -546,34 +548,19 @@ VectorEditor.prototype.rotate = function (shape, deg) {
 };
 VectorEditor.prototype.resize = function (shape, raw_x, raw_y, box) {
     var x = box[0], y = box[1], width = raw_x - x, height = raw_y - y;
+    if (width < 0 || height <0) {
+        return;
+    }
     if (shape.type === 'rect' || shape.type === 'image') {
-        if (width > 0) {
-            shape.attr('width', width);
-        } else {
-            shape.attr('x', (x ? x : shape.attr('x')) + width);
-            shape.attr('width', Math.abs(width));
-        }
-        if (height > 0) {
-            shape.attr('height', height);
-        } else {
-            shape.attr('y', (y ? y : shape.attr('y')) + height);
-            shape.attr('height', Math.abs(height));
-        }
+        shape.attr('width', width);
+        shape.attr('height', height);
     } else if (shape.type === 'ellipse') {
-        if (width > 0) {
-            shape.attr('rx', width);
-        } else {
-            shape.attr('x', (x ? x : shape.attr('x')) + width);
-            shape.attr('rx', Math.abs(width));
-        }
-        if (height > 0) {
-            shape.attr('ry', height);
-        } else {
-            shape.attr('y', (y ? y : shape.attr('y')) + height);
-            shape.attr('ry', Math.abs(height));
-        }
+        shape.attr('cx', width/2);
+        shape.attr('cy', height/2);
+        shape.attr('rx', width/2);
+        shape.attr('ry', height/2);
     } else if (shape.type === 'text') {
-        shape.attr('font-size', Math.abs(width));    //shape.node.style.fontSize = null;
+        shape.attr('font-size', Math.abs(width));
     } else if (shape.type === 'path') {
         var transforms = this.except('s', shape.transform());
         transforms.unshift([
@@ -654,8 +641,10 @@ VectorEditor.prototype.updateTracker = function (tracker) {
         var shape = tracker.shape;
         shape._.dirty = true;
         var box = shape.getBBox(true);
-        //this is somewhat hackish, if someone finds a better way to do it...
-        if (shape.type === 'path' && this.action.substr(0, 4) === 'path') {
+        console.log('box', box);
+        //this is somewhat hackish here. Once a path has stopped the transformation.
+        //all the transformations are automatically converted to coordinates.
+        if (shape.type === 'path') {
             var pathsplit = Raphael.parsePathString(shape.attr('path'));
             if (pathsplit.length === 2) {
                 tracker[0].attr({
@@ -670,18 +659,22 @@ VectorEditor.prototype.updateTracker = function (tracker) {
                     x: pathsplit[1][1] - 2,
                     y: pathsplit[1][2] - 2
                 });
+            } else {
+                tracker[0].attr({
+                    cx: box.x + box.width / 2,
+                    cy: box.y + box.height / 2
+                });
+                tracker[1].attr({
+                    x: box.x - 6,
+                    y: box.y - 6
+                });
+                tracker[2].attr({
+                    x: box.x + box.width,
+                    y: box.y + box.height
+                });
             }
-            return;
         }
-        //tracker.transform('');
         tracker.transform(shape.matrix.toTransformString());
-        //now here for the magic
-        //tracker.rotate(shape.matrix.split().rotate, box.cx, box.cy);
-        tracker.translate(box.x, box.y);
-
-        tracker.lastx = box.x;
-        //y = boxxy trollin!
-        tracker.lasty = box.y;
     }
 };
 VectorEditor.prototype.trackerBox = function (x, y, action) {
@@ -703,6 +696,7 @@ VectorEditor.prototype.trackerBox = function (x, y, action) {
     return shape;
 };
 VectorEditor.prototype.trackerCircle = function (x, y) {
+    return;
     var w = 5;
     var shape = this.paper.ellipse(x, y, w, w).attr({
         'stroke-width': 1,
@@ -743,6 +737,7 @@ VectorEditor.prototype.newTracker = function (shape) {
 VectorEditor.prototype.showTracker = function (shape) {
     var rot_offset = -14;
     var box = shape.getBBox(true);
+    console.log(box);
     var tracker = this.paper.set();
     tracker.shape = shape;
     //define the origin to transform to

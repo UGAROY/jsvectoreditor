@@ -74,7 +74,9 @@ VectorEditor.prototype.move = function (shape, dx, dy) {
     if (shape.type === 'rect' || shape.type === 'image' || shape.type === 'ellipse') {
         shape.transform(Raphael.format('...t{0},{1}', dx, dy));
     } else if (shape.type === 'path') {
-        shape.attr('path', Raphael.transformPath(shape.attr('path'), ['t', dx, dy]));
+        shape.transform(Raphael.format('...t{0},{1}', dx, dy));
+        //shape.attr('path', Raphael.transformPath(shape.attr('path'), ['t', dx, dy]));
+        console.log('move', shape.attr('path'));
     }
     this.renormalizeRotation(shape);
 };
@@ -140,34 +142,19 @@ VectorEditor.prototype.rotate = function (shape, deg) {
 };
 VectorEditor.prototype.resize = function (shape, raw_x, raw_y, box) {
     var x = box[0], y = box[1], width = raw_x - x, height = raw_y - y;
+    if (width < 0 || height <0) {
+        return;
+    }
     if (shape.type === 'rect' || shape.type === 'image') {
-        if (width > 0) {
-            shape.attr('width', width);
-        } else {
-            shape.attr('x', (x ? x : shape.attr('x')) + width);
-            shape.attr('width', Math.abs(width));
-        }
-        if (height > 0) {
-            shape.attr('height', height);
-        } else {
-            shape.attr('y', (y ? y : shape.attr('y')) + height);
-            shape.attr('height', Math.abs(height));
-        }
+        shape.attr('width', width);
+        shape.attr('height', height);
     } else if (shape.type === 'ellipse') {
-        if (width > 0) {
-            shape.attr('rx', width);
-        } else {
-            shape.attr('x', (x ? x : shape.attr('x')) + width);
-            shape.attr('rx', Math.abs(width));
-        }
-        if (height > 0) {
-            shape.attr('ry', height);
-        } else {
-            shape.attr('y', (y ? y : shape.attr('y')) + height);
-            shape.attr('ry', Math.abs(height));
-        }
+        shape.attr('cx', width/2);
+        shape.attr('cy', height/2);
+        shape.attr('rx', width/2);
+        shape.attr('ry', height/2);
     } else if (shape.type === 'text') {
-        shape.attr('font-size', Math.abs(width));    //shape.node.style.fontSize = null;
+        shape.attr('font-size', Math.abs(width));
     } else if (shape.type === 'path') {
         var transforms = this.except('s', shape.transform());
         transforms.unshift([

@@ -65,8 +65,10 @@ VectorEditor.prototype.updateTracker = function (tracker) {
         var shape = tracker.shape;
         shape._.dirty = true;
         var box = shape.getBBox(true);
-        //this is somewhat hackish, if someone finds a better way to do it...
-        if (shape.type === 'path' && this.action.substr(0, 4) === 'path') {
+        console.log('box', box);
+        //this is somewhat hackish here. Once a path has stopped the transformation.
+        //all the transformations are automatically converted to coordinates.
+        if (shape.type === 'path') {
             var pathsplit = Raphael.parsePathString(shape.attr('path'));
             if (pathsplit.length === 2) {
                 tracker[0].attr({
@@ -81,18 +83,22 @@ VectorEditor.prototype.updateTracker = function (tracker) {
                     x: pathsplit[1][1] - 2,
                     y: pathsplit[1][2] - 2
                 });
+            } else {
+                tracker[0].attr({
+                    cx: box.x + box.width / 2,
+                    cy: box.y + box.height / 2
+                });
+                tracker[1].attr({
+                    x: box.x - 6,
+                    y: box.y - 6
+                });
+                tracker[2].attr({
+                    x: box.x + box.width,
+                    y: box.y + box.height
+                });
             }
-            return;
         }
-        //tracker.transform('');
         tracker.transform(shape.matrix.toTransformString());
-        //now here for the magic
-        //tracker.rotate(shape.matrix.split().rotate, box.cx, box.cy);
-        tracker.translate(box.x, box.y);
-
-        tracker.lastx = box.x;
-        //y = boxxy trollin!
-        tracker.lasty = box.y;
     }
 };
 VectorEditor.prototype.trackerBox = function (x, y, action) {
@@ -114,6 +120,7 @@ VectorEditor.prototype.trackerBox = function (x, y, action) {
     return shape;
 };
 VectorEditor.prototype.trackerCircle = function (x, y) {
+    return;
     var w = 5;
     var shape = this.paper.ellipse(x, y, w, w).attr({
         'stroke-width': 1,
@@ -154,6 +161,7 @@ VectorEditor.prototype.newTracker = function (shape) {
 VectorEditor.prototype.showTracker = function (shape) {
     var rot_offset = -14;
     var box = shape.getBBox(true);
+    console.log(box);
     var tracker = this.paper.set();
     tracker.shape = shape;
     //define the origin to transform to
