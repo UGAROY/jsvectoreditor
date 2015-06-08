@@ -666,7 +666,9 @@ VectorEditor.prototype.updateTracker = function (tracker) {
                 });
                 tracker[1].attr({
                     x: box.x - 6,
-                    y: box.y - 6
+                    y: box.y - 6,
+                    width: box.width + 6,
+                    height: box.height + 6
                 });
                 tracker[2].attr({
                     x: box.x + box.width,
