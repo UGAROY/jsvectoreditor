@@ -76,7 +76,7 @@ VectorEditor.prototype.move = function (shape, dx, dy) {
     } else if (shape.type === 'path') {
         shape.transform(Raphael.format('...t{0},{1}', dx, dy));
         //shape.attr('path', Raphael.transformPath(shape.attr('path'), ['t', dx, dy]));
-        console.log('move', shape.attr('path'));
+        //console.log('move', shape.attr('path'));
     }
     this.renormalizeRotation(shape);
 };
@@ -113,7 +113,6 @@ VectorEditor.prototype.fixText = function (str) {
     return window.Ax ? Ax.textfix(str) : str;
 };
 VectorEditor.prototype.except = function (type, tran) {
-    console.log(tran);
     var bin = [];
     for (var i = 0; i < tran.length; i++) {
         if (tran[i][0] !== type) {

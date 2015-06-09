@@ -162,7 +162,6 @@ VectorEditor.prototype.newTracker = function (shape) {
 VectorEditor.prototype.showTracker = function (shape) {
     var rot_offset = -14;
     var box = shape.getBBox(true);
-    console.log(box);
     var tracker = this.paper.set();
     tracker.shape = shape;
     //define the origin to transform to

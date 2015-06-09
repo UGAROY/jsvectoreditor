@@ -139,6 +139,9 @@ VectorEditor.prototype.onMouseDown = function (x, y, target) {
             shape_object = target.shape_object;
         } else if (target.parentNode.shape_object) {
             shape_object = target.parentNode.shape_object;
+        } else if (target.tagName === "rect" && target.getAttribute('fill') === 'none') { // click on the existing selectbox
+            this.action = "move";
+            return;
         } else if (!target.is_tracker) {
             this.unselect();
             return;
@@ -265,7 +268,6 @@ VectorEditor.prototype.onMouseMove = function (x, y, target) {
                 //var hack = pathsplit.reverse().slice(3).reverse().join(" ")+' ';
                 if (this.mode === 'line') {
                     //safety measure, the next should work, but in practice, no
-                    console.log(pathsplit);
                     pathsplit.splice(1);
                 } else {
                     var last = pathsplit[pathsplit.length - 1];

@@ -483,7 +483,7 @@ VectorEditor.prototype.move = function (shape, dx, dy) {
     } else if (shape.type === 'path') {
         shape.transform(Raphael.format('...t{0},{1}', dx, dy));
         //shape.attr('path', Raphael.transformPath(shape.attr('path'), ['t', dx, dy]));
-        console.log('move', shape.attr('path'));
+        //console.log('move', shape.attr('path'));
     }
     this.renormalizeRotation(shape);
 };
